@@ -28,9 +28,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomeViewModel extends AndroidViewModel {
-   public UserListAdapter userListAdapter = new UserListAdapter();
-   public ArrayList<User> userArrayList = new ArrayList<>();
-   public ArrayList<User> mUserArrayList = new ArrayList<>();
+    public UserListAdapter userListAdapter = new UserListAdapter();
+    public ArrayList<User> userArrayList = new ArrayList<>();
+    public ArrayList<User> mUserArrayList = new ArrayList<>();
     public MutableLiveData<User> viewDetail = new MutableLiveData<>();
 
     public HomeViewModel(@NonNull Application application) {
@@ -109,8 +109,13 @@ public class HomeViewModel extends AndroidViewModel {
                         user.setGitUrl(ownerObj.get("html_url").isJsonNull() ? "" : ownerObj.get("html_url").getAsString());
                         userArrayList.add(user);
                     }
-                    mUserArrayList.addAll(userArrayList.subList(0, 10));
-                    userListAdapter.updateData(mUserArrayList);
+                    if (userArrayList.size() >= 10) {
+                        mUserArrayList.addAll(userArrayList.subList(0, 10));
+                        userListAdapter.updateData(mUserArrayList);
+                    } else {
+                        mUserArrayList.addAll(userArrayList.subList(0, userArrayList.size()));
+                        userListAdapter.updateData(mUserArrayList);
+                    }
 //                    userListAdapter.updateData(userArrayList);
                     userListAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
