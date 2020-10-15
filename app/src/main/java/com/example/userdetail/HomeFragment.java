@@ -1,20 +1,19 @@
 package com.example.userdetail;
 
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.userdetail.databinding.HomeFragmentBinding;
 import com.example.userdetail.userdetails.UserDetailFragment;
@@ -22,6 +21,7 @@ import com.example.userdetail.userdetails.UserDetailFragment;
 public class HomeFragment extends Fragment {
 
     private HomeViewModel mViewModel;
+    private boolean isLoading = false;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -38,28 +38,55 @@ public class HomeFragment extends Fragment {
                 replaceFragment(user);
             }
         });
-//        binding.userRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-//                if (layoutManager != null) {
-//                    int total = layoutManager.getItemCount();
-//                    int firstVisibleItemCount = layoutManager.findFirstVisibleItemPosition();
-//                    int lastVisibleItemCount = layoutManager.findLastVisibleItemPosition();
+        binding.userRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+//                    int visibleItemCount = layoutManager.getChildCount();
+//                    int totalItemCount = layoutManager.getItemCount();
+//                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 //
-//                    if (total > 0) {
-//                        if ((total - 2) == lastVisibleItemCount) {
-//                            mViewModel.userListAdapter.updateData(mViewModel.userArrayList.subList(total, total + 9));
-//                        }
+//                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+//                            && firstVisibleItemPosition >= 0
+//                            && totalItemCount >= 8) {
+//                        Toast.makeText(getActivity(), "Please wait...", Toast.LENGTH_SHORT).show();
+//                        loadmore(totalItemCount);
 //                    }
-//
-//                }
-//            }
-//        });
+
+                    int total = layoutManager.getItemCount();
+                    int firstVisibleItemCount = layoutManager.findFirstVisibleItemPosition();
+                    int lastVisibleItemCount = layoutManager.findLastVisibleItemPosition();
+
+                    if (total > 0 && !isLoading) {
+                        if ((total - 1) == lastVisibleItemCount) {
+                            isLoading = true;
+                            Toast.makeText(getActivity(), "Please wait...", Toast.LENGTH_SHORT).show();
+                            loadmore(total);
+                        }
+                    }
+                }
+            }
+        });
 
         binding.setViewModel(mViewModel);
         return binding.getRoot();
+    }
+
+    private void loadmore(int total) {
+        int addedCount = 0;
+        if (total < mViewModel.userArrayList.size()) {
+            for (int i = total; i <= (total + 9); i++) {
+                if (i < mViewModel.userArrayList.size()) {
+                    mViewModel.mUserArrayList.add(mViewModel.userArrayList.get(i));
+                    addedCount++;
+                }
+            }
+            mViewModel.userListAdapter.updateData(mViewModel.mUserArrayList);
+            mViewModel.userListAdapter.notifyItemRangeInserted(total, addedCount);
+            isLoading = false;
+        }
     }
 
     private void replaceFragment(User user) {

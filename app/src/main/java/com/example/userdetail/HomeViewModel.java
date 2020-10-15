@@ -30,20 +30,21 @@ import retrofit2.Response;
 public class HomeViewModel extends AndroidViewModel {
    public UserListAdapter userListAdapter = new UserListAdapter();
    public ArrayList<User> userArrayList = new ArrayList<>();
+   public ArrayList<User> mUserArrayList = new ArrayList<>();
     public MutableLiveData<User> viewDetail = new MutableLiveData<>();
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
-        userListAdapter.updateData(userArrayList);
+        userListAdapter.updateData(mUserArrayList);
         userListAdapter.setUserListInterface(new UserListAdapter.UserListInterface() {
             @Override
             public void addComment(int pos, String commen) {
-                addUserComment(commen, userArrayList.get(pos).getUserId());
+                addUserComment(commen, mUserArrayList.get(pos).getUserId());
             }
 
             @Override
             public void viewUser(int pos) {
-                viewDetail.setValue(userArrayList.get(pos));
+                viewDetail.setValue(mUserArrayList.get(pos));
             }
         });
         userListAdapter.notifyDataSetChanged();
@@ -108,8 +109,9 @@ public class HomeViewModel extends AndroidViewModel {
                         user.setGitUrl(ownerObj.get("html_url").isJsonNull() ? "" : ownerObj.get("html_url").getAsString());
                         userArrayList.add(user);
                     }
-//                    userListAdapter.updateData(userArrayList.subList(0, 9));
-                    userListAdapter.updateData(userArrayList);
+                    mUserArrayList.addAll(userArrayList.subList(0, 10));
+                    userListAdapter.updateData(mUserArrayList);
+//                    userListAdapter.updateData(userArrayList);
                     userListAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
                     e.printStackTrace();
